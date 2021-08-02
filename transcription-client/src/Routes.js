@@ -5,6 +5,7 @@ import NotFound from "./containers/NotFound";
 import Login from "./containers/Login";
 import Signup from "./containers/Signup";
 import NewAudio from "./containers/NewAudio";
+import Audio from "./containers/Audio";
 
 export default function Routes() {
   return (
@@ -23,6 +24,10 @@ export default function Routes() {
 
         <Route exact path="/audio/new">
             <NewAudio />
+        </Route>
+
+        <Route exact path="/audio/:id">
+            <Audio />
         </Route>
 
       {/* Finally, catch all unmatched routes */}
