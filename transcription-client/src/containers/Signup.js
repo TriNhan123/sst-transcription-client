@@ -6,6 +6,7 @@ import { useAppContext } from "../libs/contextLib";
 import { useFormFields } from "../libs/hooksLib";
 import { onError } from "../libs/errorLib";
 import "./Signup.css";
+import { Auth } from "aws-amplify";
 
 export default function Signup() {
   const [fields, handleFieldChange] = useFormFields({
@@ -33,18 +34,37 @@ export default function Signup() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-
+  
     setIsLoading(true);
-
-    setNewUser("test");
-
-    setIsLoading(false);
+  
+    try {
+      const newUser = await Auth.signUp({
+        username: fields.email,
+        password: fields.password,
+      });
+      setIsLoading(false);
+      setNewUser(newUser);
+    } catch (e) {
+      onError(e);
+      setIsLoading(false);
+    }
   }
-
+  
   async function handleConfirmationSubmit(event) {
     event.preventDefault();
-
+  
     setIsLoading(true);
+  
+    try {
+      await Auth.confirmSignUp(fields.email, fields.confirmationCode);
+      await Auth.signIn(fields.email, fields.password);
+  
+      userHasAuthenticated(true);
+      history.push("/");
+    } catch (e) {
+      onError(e);
+      setIsLoading(false);
+    }
   }
 
   function renderConfirmationForm() {
@@ -115,7 +135,7 @@ export default function Signup() {
       </Form>
     );
   }
-
+  
   return (
     <div className="Signup">
       {newUser === null ? renderForm() : renderConfirmationForm()}
