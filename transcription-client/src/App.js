@@ -7,30 +7,34 @@ import { LinkContainer } from "react-router-bootstrap";
 import { AppContext } from "./libs/contextLib";
 import { Auth } from "aws-amplify";
 import { useHistory } from "react-router-dom";
+import { onError } from "./libs/errorLib";
 
 function App() {
   const history = useHistory();
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [isAuthenticated, userHasAuthenticated] = useState(false);
+
+  //empty array = only run function of the first render 
   useEffect(() => {
     onLoad();
   }, []);
   
   async function onLoad() {
     try {
+      //make log in persit = store and load it from the browser session with Auth.currentSession();
       await Auth.currentSession();
       userHasAuthenticated(true);
     }
     catch(e) {
       if (e !== 'No current user') {
-        alert(e);
+        onError(e);
       }
     }
   
     setIsAuthenticating(false);
   }
   async function handleLogout() {
-    //clear browser local storage
+    //clear browser local storage after log out, if not, the app stay logged in after refreshing
     await Auth.signOut();
   
     userHasAuthenticated(false);
@@ -39,6 +43,7 @@ function App() {
     history.push("/login");
   }
   return (
+    //no render till isAuthing false 
     !isAuthenticating && (
     <div className="App container py-3">
       <Navbar collapseOnSelect bg="light" expand="md" className="mb-3">
@@ -53,6 +58,7 @@ function App() {
           {isAuthenticated ? (
             <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
           ) : (
+            // <> placeholder component: if not logged, render 2 links already inside component => no render extra html 
             <>
               <LinkContainer to="/signup">
                 <Nav.Link>Signup</Nav.Link>
