@@ -6,8 +6,10 @@ import Nav from "react-bootstrap/Nav";
 import { LinkContainer } from "react-router-bootstrap";
 import { AppContext } from "./libs/contextLib";
 import { Auth } from "aws-amplify";
+import { useHistory } from "react-router-dom";
 
 function App() {
+  const history = useHistory();
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [isAuthenticated, userHasAuthenticated] = useState(false);
   useEffect(() => {
@@ -27,8 +29,14 @@ function App() {
   
     setIsAuthenticating(false);
   }
-  function handleLogout() {
+  async function handleLogout() {
+    //clear browser local storage
+    await Auth.signOut();
+  
     userHasAuthenticated(false);
+
+    //after log out go back to log in 
+    history.push("/login");
   }
   return (
     !isAuthenticating && (
